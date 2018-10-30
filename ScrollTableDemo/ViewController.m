@@ -31,7 +31,7 @@
 		30.0f
 	};
 
-	CircleRunView *circleView = [[CircleRunView alloc]initWithFrame:CGRectMake(0, 0, 250, 195)];
+	CircleRunView *circleView = [[CircleRunView alloc]initWithFrame:CGRectMake(0, 0, 250, 193)];
 	_circleView = circleView;
 	circleView.center = self.view.center;
 	[self.view addSubview:circleView];

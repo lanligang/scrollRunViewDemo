@@ -28,6 +28,9 @@ UITableViewDataSource>
 @property (nonatomic,strong)NSMutableArray *dataSource;
 
 @property (nonatomic,strong)SafeObjct *safeObj;
+//是否已经运行过了
+@property(nonatomic,assign)BOOL isHasRun;
+
 @end
 
 
@@ -150,33 +153,55 @@ UITableViewDataSource>
 #pragma mark 初始化数据
 -(void)configerDataSource
 {
-		//暂停运行
+	//暂停运行
 	[self pasueRun];
 		//配置数据
 	CGFloat table1Height = self.dataSource.count * _cellHeight;
 	CGFloat table2Height = self.dataSource.count * _cellHeight;
+	if (self.isHasRun) {
+		CGFloat currentY1 = _table1.frame.origin.y;
+		CGFloat currentY2 = _table2.frame.origin.y;
+		if (currentY1 < currentY2) {
+			//表 1 在上面
+			_table1.frame = (CGRect){
+				_table1.frame.origin,
+				_table1.frame.size.width,
+				table1Height};
 
-	_table1.frame = (CGRect){
-		_table1.frame.origin,
-		_table1.frame.size.width,
-		table1Height
-	};
+			_table2.frame = (CGRect){
+				_table2.frame.origin.x,
+				CGRectGetMaxY(_table1.frame),
+				CGRectGetWidth(_table2.frame),
+				table2Height};
 
-	CGFloat tableY2 = CGRectGetMaxY(_table1.frame);
-	
-	_table2.frame = (CGRect){
-		_table2.frame.origin.x,
-		tableY2,
-		_table2.frame.size.width,
-		table2Height
-	};
+		}else{
+			//表二 在上面
+			_table2.frame = (CGRect){_table2.frame.origin,_table2.frame.size.width,table2Height};
+			_table1.frame = (CGRect){_table1.frame.origin.x,CGRectGetMaxY(_table2.frame),CGRectGetWidth(_table1.frame),table1Height};
+		}
+	}else{
+		_table1.frame = (CGRect){
+			_table1.frame.origin,
+			_table1.frame.size.width,
+			table1Height
+		};
 
+		CGFloat tableY2 = CGRectGetMaxY(_table1.frame);
+
+		_table2.frame = (CGRect){
+			_table2.frame.origin.x,
+			tableY2,
+			_table2.frame.size.width,
+			table2Height
+		};
+	}
 	[self reloadTableData];
 	[self startRun];
 }
 	//开始运行
 -(void)startRun
 {
+	self.isHasRun = YES;
 	_timer.paused = NO;
 }
 	//暂停运行
