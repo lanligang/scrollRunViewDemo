@@ -1,10 +1,10 @@
-//
-//  CircleRunView.m
-//  ScrollTableDemo
-//
-//  Created by ios2 on 2018/10/30.
-//  Copyright © 2018 LenSky. All rights reserved.
-//
+	//
+	//  CircleRunView.m
+	//  ScrollTableDemo
+	//
+	//  Created by ios2 on 2018/10/30.
+	//  Copyright © 2018 LenSky. All rights reserved.
+	//
 
 #import "CircleRunView.h"
 #import "SafeObjct.h"
@@ -17,7 +17,6 @@ UITableViewDataSource>
 	UITableView * _table1;
 		//动态表 2
 	UITableView * _table2;
-
 		//单个cell 的高度
 	CGFloat _cellHeight;
 	CADisplayLink *_timer;
@@ -27,10 +26,9 @@ UITableViewDataSource>
 
 @property (nonatomic,strong)NSMutableArray *dataSource;
 
-@property (nonatomic,strong)SafeObjct *safeObj;
-//是否已经运行过了
-@property(nonatomic,assign)BOOL isHasRun;
+@property (nonatomic,strong)NSMutableArray *cellArray;
 
+@property (nonatomic,strong)SafeObjct *safeObj;
 @end
 
 
@@ -41,15 +39,16 @@ UITableViewDataSource>
 	self = [super initWithFrame:frame];
 	if (self) {
 
-		_cellHeight = 20.0f;
-		_speed  = 0.85;
-		
+		_cellHeight = 30.0f;
+
+		_speed  = 0.35;
+
 		UIView *containtView = [[UIView alloc]init];
 		containtView.clipsToBounds = YES;
 		containtView.frame = self.bounds;
 		[self addSubview:containtView];
 
-		//设置表
+			//设置表
 		UITableView *tableView1 = [[UITableView alloc]initWithFrame:self.bounds style:UITableViewStyleGrouped];
 		tableView1.separatorColor = [[UIColor whiteColor]colorWithAlphaComponent:0];
 		tableView1.backgroundColor = [[UIColor whiteColor]colorWithAlphaComponent:0];
@@ -86,7 +85,7 @@ UITableViewDataSource>
 		_timer.paused = YES;
 
 		[disPlayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
-		
+
 	}
 	return self;
 }
@@ -123,6 +122,7 @@ UITableViewDataSource>
 			_table2.frame.size
 		};
 	}
+	[self checkCellFrame];
 }
 -(void)addTitlesWithArray:(NSArray <NSString *>*)titles
 {
@@ -132,11 +132,11 @@ UITableViewDataSource>
 			[self.dataSource removeAllObjects];
 			NSMutableArray *tmpArray = [NSMutableArray array];
 
-		   CGFloat height = 	CGRectGetHeight(self.frame);
+			CGFloat height = 	CGRectGetHeight(self.frame);
 			CGFloat baseHeight =  titles.count * _cellHeight;
 			CGFloat minHeight = height * 1.5f;
-		     CGFloat scale = 	(minHeight - baseHeight )/minHeight;
-			
+			CGFloat scale = 	(minHeight - baseHeight )/minHeight;
+
 			if (scale < 1.0 && scale >= 0) {
 				NSInteger runCount = ( titles.count / (1 - scale)/1) /titles.count;
 				for (int i = 0; i< runCount; i++) {
@@ -153,55 +153,46 @@ UITableViewDataSource>
 #pragma mark 初始化数据
 -(void)configerDataSource
 {
-	//暂停运行
+		//暂停运行
 	[self pasueRun];
 		//配置数据
 	CGFloat table1Height = self.dataSource.count * _cellHeight;
 	CGFloat table2Height = self.dataSource.count * _cellHeight;
-	if (self.isHasRun) {
-		CGFloat currentY1 = _table1.frame.origin.y;
-		CGFloat currentY2 = _table2.frame.origin.y;
-		if (currentY1 < currentY2) {
-			//表 1 在上面
-			_table1.frame = (CGRect){
-				_table1.frame.origin,
-				_table1.frame.size.width,
-				table1Height};
 
-			_table2.frame = (CGRect){
-				_table2.frame.origin.x,
-				CGRectGetMaxY(_table1.frame),
-				CGRectGetWidth(_table2.frame),
-				table2Height};
+	_table1.frame = (CGRect){
+		_table1.frame.origin,
+		_table1.frame.size.width,
+		table1Height
+	};
 
-		}else{
-			//表二 在上面
-			_table2.frame = (CGRect){_table2.frame.origin,_table2.frame.size.width,table2Height};
-			_table1.frame = (CGRect){_table1.frame.origin.x,CGRectGetMaxY(_table2.frame),CGRectGetWidth(_table1.frame),table1Height};
-		}
-	}else{
-		_table1.frame = (CGRect){
-			_table1.frame.origin,
-			_table1.frame.size.width,
-			table1Height
-		};
+	CGFloat tableY2 = CGRectGetMaxY(_table1.frame);
 
-		CGFloat tableY2 = CGRectGetMaxY(_table1.frame);
+	_table2.frame = (CGRect){
+		_table2.frame.origin.x,
+		tableY2,
+		_table2.frame.size.width,
+		table2Height
+	};
 
-		_table2.frame = (CGRect){
-			_table2.frame.origin.x,
-			tableY2,
-			_table2.frame.size.width,
-			table2Height
-		};
-	}
 	[self reloadTableData];
 	[self startRun];
+}
+	//查看位置
+-(void)checkCellFrame
+{
+	for (int i = 0; i<self.cellArray.count; i++) {
+		UITableViewCell *cell =  self.cellArray[i];
+		CGRect aRect  = [self convertRect:cell.bounds fromView:cell];
+		CGFloat centerY = 	CGRectGetMidY(aRect);
+		CGFloat   centerY2 = 	CGRectGetMidY(self.bounds);
+		CGFloat scale = 1 -	fabs((centerY2 - centerY))/CGRectGetHeight(self.frame)/2.0f;
+		cell.textLabel.transform = CGAffineTransformMakeScale(scale, scale);
+		cell.textLabel.textColor = [[UIColor whiteColor]colorWithAlphaComponent:scale];
+	}
 }
 	//开始运行
 -(void)startRun
 {
-	self.isHasRun = YES;
 	_timer.paused = NO;
 }
 	//暂停运行
@@ -233,12 +224,16 @@ UITableViewDataSource>
 	cell.backgroundColor = [[UIColor whiteColor]colorWithAlphaComponent:0];
 	NSString *str = self.dataSource[indexPath.row];
 	cell.textLabel.text = [NSString stringWithFormat:@"%d  %@",indexPath.row,str];
-	cell.textLabel.font = [UIFont systemFontOfSize:13.5f];
+	cell.textLabel.font = [UIFont systemFontOfSize:16.5f];
 	cell.textLabel.textAlignment = NSTextAlignmentCenter;
 	cell.textLabel.textColor = [UIColor whiteColor];
 	[cell setSelectionStyle:UITableViewCellSelectionStyleNone];
+	if (![self.cellArray containsObject:cell]) {
+		[self.cellArray addObject:cell];
+	}
 	return cell;
 }
+
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	return _cellHeight;
@@ -269,6 +264,15 @@ UITableViewDataSource>
 	 }
 	return _dataSource;
 }
+-(NSMutableArray *)cellArray
+{
+	if (!_cellArray)
+	 {
+		_cellArray = [[NSMutableArray alloc]init];
+	 }
+	return _cellArray;
+}
+
 
 -(void)dealloc
 {

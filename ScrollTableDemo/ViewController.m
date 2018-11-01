@@ -1,10 +1,10 @@
-//
-//  ViewController.m
-//  ScrollTableDemo
-//
-//  Created by mc on 2018/10/30.
-//  Copyright © 2018 LenSky. All rights reserved.
-//
+	//
+	//  ViewController.m
+	//  ScrollTableDemo
+	//
+	//  Created by mc on 2018/10/30.
+	//  Copyright © 2018 LenSky. All rights reserved.
+	//
 
 #import "ViewController.h"
 #import "CircleRunView.h"
@@ -31,7 +31,7 @@
 		30.0f
 	};
 
-	CircleRunView *circleView = [[CircleRunView alloc]initWithFrame:CGRectMake(0, 0, 250, 193)];
+	CircleRunView *circleView = [[CircleRunView alloc]initWithFrame:CGRectMake(0, 0, 250, 90)];
 	_circleView = circleView;
 	circleView.center = self.view.center;
 	[self.view addSubview:circleView];
